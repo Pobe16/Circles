@@ -130,7 +130,7 @@ class ViewController: UIViewController {
                 if shape != currentShape {
                     let initialDistanceX = shape.center.x - currentShape.center.x
                     let initialDistanceY = shape.center.y - currentShape.center.y
-                    let distanceBetweenCentres =  (initialDistanceX*initialDistanceX + initialDistanceY*initialDistanceY).squareRoot()
+                    let distanceBetweenCentres =  (initialDistanceX * initialDistanceX + initialDistanceY * initialDistanceY).squareRoot()
                     
                     let distanceBetweenShapes = shape.frame.size.width/2 + currentShape.frame.size.width/2
                     
