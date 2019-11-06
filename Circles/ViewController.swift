@@ -11,6 +11,8 @@ import UIKit
 class ViewController: UIViewController {
     var lastTouch : CGPoint?
     var greatCircleDance : Int = 0
+    let resetButton = UIButton(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 120, height: 60)))
+    let explanationLabel = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 200, height: 60)))
     
     @IBOutlet var gr: UITapGestureRecognizer!
     @IBOutlet var sgr: UISwipeGestureRecognizer!
@@ -24,6 +26,76 @@ class ViewController: UIViewController {
         
         view.addGestureRecognizer(gr)
         view.addGestureRecognizer(sgr)
+        prepareResetButton()
+        prepareExplanationLabel()
+        
+        
+    }
+    
+    func prepareExplanationLabel(){
+        explanationLabel.text = "Start tapping!"
+        explanationLabel.backgroundColor = UIColor(named: "buttonBackground")
+        explanationLabel.clipsToBounds = true
+        explanationLabel.textAlignment = .center
+        explanationLabel.layer.cornerRadius = explanationLabel .frame.height / 2
+        view.addSubview(explanationLabel)
+        explanationLabel.font = explanationLabel.font.withSize(25)
+        view.addSubview(explanationLabel)
+        explanationLabel.translatesAutoresizingMaskIntoConstraints = false
+        explanationLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 40).isActive = true
+        explanationLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        explanationLabel.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        explanationLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
+    }
+    
+    func prepareResetButton() {
+        resetButton.setTitle("Reset", for: .normal)
+        resetButton.backgroundColor = UIColor(named: "buttonBackground")
+        resetButton.layer.cornerRadius = resetButton.frame.height / 2
+        resetButton.layer.zPosition = .greatestFiniteMagnitude
+        resetButton.addTarget(self, action: #selector(resetShapes), for: .touchUpInside)
+        view.addSubview(resetButton)
+        resetButton.titleLabel?.font = resetButton.titleLabel?.font.withSize(25)
+        resetButton.translatesAutoresizingMaskIntoConstraints = false
+        resetButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -40).isActive = true
+        resetButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40).isActive = true
+        resetButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
+        resetButton.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        resetButton.isHidden = true
+        
+    }
+    
+    @objc func resetShapes (sender: UIButton) {
+        view.subviews.forEach { shape in
+            if shape != resetButton {
+                UIView.animate(
+                    withDuration: 0.75,
+                    delay: 0,
+                    usingSpringWithDamping: 0.75,
+                    initialSpringVelocity: 0.25,
+                    options: [],
+                    animations: {
+                        shape.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+                    },
+                    completion: { (finished : Bool) in
+                        shape.removeFromSuperview()
+                    }
+                )
+            }
+            
+        }
+        UIView.animate(
+            withDuration: 0.75,
+            delay: 0,
+            usingSpringWithDamping: 0.6,
+            initialSpringVelocity: 0,
+            options: [],
+            animations: {self.resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
+            completion: { (finished : Bool) in
+                self.resetButton.isHidden = true
+            }
+        )
     }
     
     @objc func handleTap(sender: UITapGestureRecognizer) {
@@ -44,6 +116,34 @@ class ViewController: UIViewController {
                        completion: nil)
         
         spreadViewsAround()
+        if resetButton.isHidden {
+            self.resetButton.isHidden = false
+            UIView.animate(
+                withDuration: 0.75,
+                delay: 0,
+                usingSpringWithDamping: 0.6,
+                initialSpringVelocity: 0,
+                options: [],
+                animations: {self.resetButton.transform = .identity},
+                completion: nil
+            )
+        }
+        
+        if explanationLabel.isHidden {
+            
+        } else {
+            UIView.animate(
+                withDuration: 0.75,
+                delay: 0,
+                usingSpringWithDamping: 0.6,
+                initialSpringVelocity: 0,
+                options: [],
+                animations: {self.explanationLabel.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
+                completion: { (finished : Bool) in
+                    self.explanationLabel.isHidden = true
+                }
+            )
+        }
                        
     }
     
@@ -58,7 +158,7 @@ class ViewController: UIViewController {
         let lastAdded = view.subviews.last
 
         view.subviews.forEach {  shape in
-            if shape != lastAdded {
+            if shape != lastAdded && shape != resetButton {
                 let initialDistanceX = shape.center.x - lastAdded!.center.x
                 let initialDistanceY = shape.center.y - lastAdded!.center.y
                 let distanceBetweenCentres =  (initialDistanceX*initialDistanceX + initialDistanceY*initialDistanceY).squareRoot()
@@ -106,12 +206,12 @@ class ViewController: UIViewController {
     func removeShapesOutOfBounds() {
         var shapesDeleted = 0
          view.subviews.forEach { shape in
-            if (
-                shape.center.x + shape.frame.size.width/2 < 0 ||
+            if  (
+                    shape.center.x + shape.frame.size.width/2 < 0 ||
                     shape.center.y + shape.frame.size.height/2 < 0
                 ) || (
                     shape.center.x - shape.frame.size.width/2 > view.bounds.maxX ||
-                        shape.center.y - shape.frame.size.height/2 > view.bounds.maxY
+                    shape.center.y - shape.frame.size.height/2 > view.bounds.maxY
                 )
             {
                 shapesDeleted += 1
@@ -127,10 +227,10 @@ class ViewController: UIViewController {
         view.subviews.reversed().forEach{ mainShape in
             let currentShape = mainShape
             view.subviews.forEach { shape in
-                if shape != currentShape {
+                if shape != currentShape && shape != resetButton {
                     let initialDistanceX = shape.center.x - currentShape.center.x
                     let initialDistanceY = shape.center.y - currentShape.center.y
-                    let distanceBetweenCentres =  (initialDistanceX*initialDistanceX + initialDistanceY*initialDistanceY).squareRoot()
+                    let distanceBetweenCentres =  (initialDistanceX * initialDistanceX + initialDistanceY * initialDistanceY).squareRoot()
                     
                     let distanceBetweenShapes = shape.frame.size.width/2 + currentShape.frame.size.width/2
                     
