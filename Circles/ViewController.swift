@@ -129,9 +129,7 @@ class ViewController: UIViewController {
             )
         }
         
-        if explanationLabel.isHidden {
-            
-        } else {
+        if explanationLabel.isHidden == false {
             UIView.animate(
                 withDuration: 0.75,
                 delay: 0,
@@ -140,7 +138,7 @@ class ViewController: UIViewController {
                 options: [],
                 animations: {self.explanationLabel.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
                 completion: { (finished : Bool) in
-                    self.explanationLabel.isHidden = true
+                    if finished {self.explanationLabel.isHidden = true}
                 }
             )
         }
@@ -150,7 +148,7 @@ class ViewController: UIViewController {
     
     @objc func handleSwipe(sender: UIPanGestureRecognizer) {
         print("Swipe")
-        view.subviews.last?.removeFromSuperview()
+//        view.subviews.last?.removeFromSuperview()
         
     }
     
