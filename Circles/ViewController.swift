@@ -79,7 +79,7 @@ class ViewController: UIViewController {
                         shape.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
                     },
                     completion: { (finished : Bool) in
-                        shape.removeFromSuperview()
+                        if finished {shape.removeFromSuperview()}
                     }
                 )
             }
@@ -93,7 +93,7 @@ class ViewController: UIViewController {
             options: [],
             animations: {self.resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
             completion: { (finished : Bool) in
-                self.resetButton.isHidden = true
+                if finished {self.resetButton.isHidden = true}
             }
         )
     }
@@ -107,15 +107,17 @@ class ViewController: UIViewController {
         
         newView.transform = CGAffineTransform(scaleX: 0.2, y: 0.5)
         view.addSubview(newView)
-        UIView.animate(withDuration: 0.25,
-                       delay: 0,
-                       usingSpringWithDamping: 0.6,
-                       initialSpringVelocity: 0,
-                       options: [],
-                       animations: {newView.transform = .identity},
-                       completion: nil)
+        UIView.animate(
+            withDuration: 0.25,
+            delay: 0,
+            usingSpringWithDamping: 0.6,
+            initialSpringVelocity: 0,
+            options: [],
+            animations: {newView.transform = .identity},
+            completion: nil
+        )
         
-        spreadViewsAround()
+        
         if resetButton.isHidden {
             self.resetButton.isHidden = false
             UIView.animate(
@@ -131,7 +133,7 @@ class ViewController: UIViewController {
         
         if explanationLabel.isHidden == false {
             UIView.animate(
-                withDuration: 0.75,
+                withDuration: 0.25,
                 delay: 0,
                 usingSpringWithDamping: 0.6,
                 initialSpringVelocity: 0,
@@ -142,6 +144,8 @@ class ViewController: UIViewController {
                 }
             )
         }
+        self.spreadViewsAround()
+        
                        
     }
     
@@ -163,7 +167,6 @@ class ViewController: UIViewController {
                 
                 let distanceBetweenShapes = shape.frame.size.width/2 + lastAdded!.frame.size.width/2
                 
-
                 if distanceBetweenCentres < distanceBetweenShapes {
                     
                     let proportionalDistance = distanceBetweenShapes / distanceBetweenCentres
@@ -181,17 +184,18 @@ class ViewController: UIViewController {
                         y: lastAddedPosition.y + moveShapeByY - shape.frame.size.width/2
                     )
                     
-                    UIView.animate(withDuration: 0.5,
-                                   delay: 0,
-                                   usingSpringWithDamping: 0.25,
-                                   initialSpringVelocity: 0,
-                                   options: [],
-                                   animations: {
-                                       shape.frame = CGRect(origin: newPosition, size: size)
-                                   },
-                                   completion: {(finished : Bool) in
-                                    self.theGreatShapeDance()
-                    }
+                    UIView.animate(
+                        withDuration: 0.5,
+                        delay: 0,
+                        usingSpringWithDamping: 0.25,
+                        initialSpringVelocity: 0,
+                        options: [],
+                        animations: {
+                           shape.frame = CGRect(origin: newPosition, size: size)
+                        },
+                        completion: {(finished : Bool) in
+                            if finished {self.theGreatShapeDance()}
+                        }
                     )
                     
                     
@@ -251,15 +255,16 @@ class ViewController: UIViewController {
                             x: lastAddedPosition.x + moveShapeByX - shape.frame.size.width/2,
                             y: lastAddedPosition.y + moveShapeByY - shape.frame.size.width/2
                         )
-                        UIView.animate(withDuration: 0.5,
-                                       delay: 0 ,
-                                       usingSpringWithDamping: 0.25,
-                                       initialSpringVelocity: 0,
-                                       options: [],
-                                       animations: {
-                                           shape.frame = CGRect(origin: newPosition, size: size)
-                                       },
-                                       completion: nil
+                        UIView.animate(
+                            withDuration: 0.5,
+                            delay: 0 ,
+                            usingSpringWithDamping: 0.25,
+                            initialSpringVelocity: 0,
+                            options: [],
+                            animations: {
+                               shape.frame = CGRect(origin: newPosition, size: size)
+                            },
+                            completion: nil
                         )
                         
                         
