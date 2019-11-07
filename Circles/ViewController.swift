@@ -29,7 +29,6 @@ class ViewController: UIViewController {
         prepareResetButton()
         prepareExplanationLabel()
         
-        
     }
     
     func prepareExplanationLabel(){
@@ -298,8 +297,24 @@ class ViewController: UIViewController {
         let newView = UIView()
         
         newView.frame = CGRect(origin: position, size: size)
-        newView.backgroundColor = makeRandomColor()
+//        newView.backgroundColor = makeRandomColor()
+        let gradient = CAGradientLayer()
+
+        gradient.frame = newView.bounds
+        gradient.cornerRadius = makeRandomCornerRadius(usingWidth: shorterSizeOfTheThing)
+        gradient.colors = [makeRandomColor().cgColor, makeRandomColor().cgColor]
+        gradient.startPoint = CGPoint.zero
+        gradient.endPoint = Int.random(in: 0...1) == 1 ? CGPoint(
+            x: 1,
+            y: CGFloat.random(in: 0.0 ... 1.0)
+        ) : CGPoint(
+            x: CGFloat.random(in: 0.0 ... 1.0),
+            y: 1
+        )
+        newView.layer.insertSublayer(gradient, at: 0)
         newView.layer.cornerRadius = makeRandomCornerRadius(usingWidth: shorterSizeOfTheThing)
+        
+        
         
         return newView
         
@@ -336,9 +351,16 @@ class ViewController: UIViewController {
     }
     
     func makeRandomColor() -> UIColor {
-        let randomRed = CGFloat.random(in: 0...255) / 255
-        let randomGreen = CGFloat.random(in: 0...255) / 255
-        let randomBlue = CGFloat.random(in: 0...255) / 255
+        
+//        let randomRange : ClosedRange<CGFloat> = 0...255
+        let pastelRange : ClosedRange<CGFloat> = 127...255
+        
+        let randomRed = CGFloat.random(in: pastelRange) / 255
+        let randomGreen = CGFloat.random(in: pastelRange) / 255
+        let randomBlue = CGFloat.random(in: pastelRange) / 255
+//        let randomRed = CGFloat.random(in: randomRange) / 255
+//        let randomGreen = CGFloat.random(in: randomRange) / 255
+//        let randomBlue = CGFloat.random(in: randomRange) / 255
         let randomAlpha = CGFloat.random(in: 0.6...1)
         
         
