@@ -72,7 +72,7 @@ class ViewController: UIViewController {
                     delay: 0,
                     usingSpringWithDamping: 0.75,
                     initialSpringVelocity: 0.25,
-                    options: [],
+                    options: [.allowUserInteraction],
                     animations: {
                         shape.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
                     },
@@ -88,7 +88,7 @@ class ViewController: UIViewController {
             delay: 0,
             usingSpringWithDamping: 0.6,
             initialSpringVelocity: 0,
-            options: [],
+            options: [.allowUserInteraction],
             animations: {
                 self.resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
                 self.explanationLabel.transform = .identity
@@ -115,7 +115,7 @@ class ViewController: UIViewController {
             delay: 0,
             usingSpringWithDamping: 0.6,
             initialSpringVelocity: 0,
-            options: [],
+            options: [.allowUserInteraction],
             animations: {newView.transform = .identity},
             completion: nil
         )
@@ -128,7 +128,7 @@ class ViewController: UIViewController {
                 delay: 0,
                 usingSpringWithDamping: 0.6,
                 initialSpringVelocity: 0,
-                options: [],
+                options: [.allowUserInteraction],
                 animations: {self.resetButton.transform = .identity},
                 completion: nil
             )
@@ -140,7 +140,7 @@ class ViewController: UIViewController {
                 delay: 0,
                 usingSpringWithDamping: 0.6,
                 initialSpringVelocity: 0,
-                options: [],
+                options: [.allowUserInteraction],
                 animations: {
                     self.explanationLabel.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
                 },
@@ -176,7 +176,7 @@ class ViewController: UIViewController {
                     delay: 0,
                     usingSpringWithDamping: abs(velocity.x/1000) + abs(velocity.y/1000),
                     initialSpringVelocity: abs(velocity.x/1000) + abs(velocity.y/1000),
-                    options: [],
+                    options: [.allowUserInteraction],
                     animations: {
                         viewToDrag.center = CGPoint(x: viewToDrag.center.x + velocity.x / 10, y: viewToDrag.center.y + velocity.y / 10)
                     },
@@ -233,7 +233,7 @@ class ViewController: UIViewController {
                         delay: 0,
                         usingSpringWithDamping: 0.25,
                         initialSpringVelocity: 0,
-                        options: [],
+                        options: [.allowUserInteraction],
                         animations: {
                            shape.frame = CGRect(origin: newPosition, size: size)
                         },
@@ -313,7 +313,7 @@ class ViewController: UIViewController {
                             delay: 0 ,
                             usingSpringWithDamping: 0.25,
                             initialSpringVelocity: 0,
-                            options: [],
+                            options: [.allowUserInteraction],
                             animations: {
                                shape.frame = CGRect(origin: newPosition, size: size)
                             },
