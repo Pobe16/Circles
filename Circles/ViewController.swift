@@ -160,8 +160,6 @@ class ViewController: UIViewController {
     @objc func handlePan(sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: view)
         
-        
-        
         if let viewToDrag = sender.view {
             
             if sender.state == .changed {
@@ -327,12 +325,12 @@ class ViewController: UIViewController {
             
         }
         greatCircleDance += 1
-        print("This dance moved \(shapesMoved) shapes.")
+//        print("This dance moved \(shapesMoved) shapes.")
         removeShapesOutOfBounds()
         if shapeMoved && greatCircleDance < 150 {
             theGreatShapeDance(currentView)
         } else {
-            print("The Great Circle Dance has run \(greatCircleDance) times. There are \(view.subviews.count) shapes.")
+//            print("The Great Circle Dance has run \(greatCircleDance) times. There are \(view.subviews.count) shapes.")
             greatCircleDance = 0
         }
     }
