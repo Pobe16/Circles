@@ -14,37 +14,35 @@ class ViewController: UIViewController {
     let resetButton = UIButton(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 120, height: 60)))
     let explanationLabel = UILabel(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 200, height: 60)))
     
-    @IBOutlet var gr: UITapGestureRecognizer!
-    @IBOutlet var sgr: UISwipeGestureRecognizer!
+    @IBOutlet var tapGesture: UITapGestureRecognizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         // Do any additional setup after loading the view.
         
-        gr.addTarget(self, action: #selector(handleTap))
-        sgr.addTarget(self, action: #selector(handleSwipe))
+        tapGesture.addTarget(self, action: #selector(handleTap))
         
-        view.addGestureRecognizer(gr)
-        view.addGestureRecognizer(sgr)
+        view.addGestureRecognizer(tapGesture)
         prepareResetButton()
         prepareExplanationLabel()
-        
     }
+        
     
     func prepareExplanationLabel(){
         explanationLabel.text = "Start tapping!"
-        explanationLabel.backgroundColor = UIColor(named: "buttonBackground")
+//        explanationLabel.backgroundColor = UIColor(named: "buttonBackground")
         explanationLabel.clipsToBounds = true
         explanationLabel.textAlignment = .center
         explanationLabel.layer.cornerRadius = explanationLabel .frame.height / 2
-        view.addSubview(explanationLabel)
-        explanationLabel.font = explanationLabel.font.withSize(25)
+        explanationLabel.font = explanationLabel.font.withSize(35)
         view.addSubview(explanationLabel)
         explanationLabel.translatesAutoresizingMaskIntoConstraints = false
         explanationLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 40).isActive = true
-        explanationLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        explanationLabel.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        explanationLabel.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        explanationLabel.bottomAnchor.constraint(equalTo: view.topAnchor, constant: 100).isActive = true
+        explanationLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40).isActive = true
+        explanationLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40).isActive = true
+        
     }
     
     func prepareResetButton() {
@@ -66,8 +64,9 @@ class ViewController: UIViewController {
     }
     
     @objc func resetShapes (sender: UIButton) {
+        explanationLabel.isHidden = false
         view.subviews.forEach { shape in
-            if shape != resetButton {
+            if shape != resetButton && shape != explanationLabel  {
                 UIView.animate(
                     withDuration: 0.75,
                     delay: 0,
@@ -90,11 +89,16 @@ class ViewController: UIViewController {
             usingSpringWithDamping: 0.6,
             initialSpringVelocity: 0,
             options: [],
-            animations: {self.resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
+            animations: {
+                self.resetButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+                self.explanationLabel.transform = .identity
+            },
             completion: { (finished : Bool) in
                 if finished {self.resetButton.isHidden = true}
             }
         )
+        
+        
     }
     
     @objc func handleTap(sender: UITapGestureRecognizer) {
@@ -137,40 +141,81 @@ class ViewController: UIViewController {
                 usingSpringWithDamping: 0.6,
                 initialSpringVelocity: 0,
                 options: [],
-                animations: {self.explanationLabel.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)},
+                animations: {
+                    self.explanationLabel.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                },
                 completion: { (finished : Bool) in
-                    if finished {self.explanationLabel.isHidden = true}
+                    if finished {
+                        self.explanationLabel.isHidden = true
+                    }
                 }
             )
         }
-        self.spreadViewsAround()
+        spreadViewsAround(newView)
         
                        
     }
     
     
-    @objc func handleSwipe(sender: UIPanGestureRecognizer) {
-        print("Swipe")
-//        view.subviews.last?.removeFromSuperview()
+    @objc func handlePan(sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: view)
+        
+        
+        
+        if let viewToDrag = sender.view {
+            
+            if sender.state == .changed {
+                viewToDrag.center = CGPoint(x: viewToDrag.center.x + translation.x, y: viewToDrag.center.y + translation.y)
+                sender.setTranslation(CGPoint(x: 0, y: 0), in: view)
+                spreadViewsAround(viewToDrag)
+            }
+            if sender.state == .ended {
+                let velocity = sender.velocity(in: view)
+                UIView.animate(
+                    withDuration: min(Double(abs(velocity.x/1000) + abs(velocity.y/1000))/2, 0.5),
+                    delay: 0,
+                    usingSpringWithDamping: abs(velocity.x/1000) + abs(velocity.y/1000),
+                    initialSpringVelocity: abs(velocity.x/1000) + abs(velocity.y/1000),
+                    options: [],
+                    animations: {
+                        viewToDrag.center = CGPoint(x: viewToDrag.center.x + velocity.x / 10, y: viewToDrag.center.y + velocity.y / 10)
+                    },
+                    completion: { (finished : Bool) in
+                        if finished {
+                            self.spreadViewsAround(viewToDrag)
+                        }
+                    }
+                )
+            }
+            
+        }
+        
         
     }
     
-    func spreadViewsAround() {
-        let lastAdded = view.subviews.last
-
-        view.subviews.forEach {  shape in
-            if shape != lastAdded && shape != resetButton {
-                let initialDistanceX = shape.center.x - lastAdded!.center.x
-                let initialDistanceY = shape.center.y - lastAdded!.center.y
+    func spreadViewsAround(_ currentView : UIView) {
+        
+        view.subviews.sorted(by: {
+            let distanceX1 = $0.center.x - currentView.center.x
+            let distanceY1 = $0.center.y - currentView.center.y
+            let distanceX2 = $1.center.x - currentView.center.x
+            let distanceY2 = $1.center.y - currentView.center.y
+            let distance1 = distanceX1 * distanceX1 + distanceY1 * distanceY1
+            let distance2 = distanceX2 * distanceX2 + distanceY2 * distanceY2
+            return distance1 < distance2
+        }).forEach {  shape in
+            if shape != currentView && shape != resetButton && shape != explanationLabel {
+                let initialDistanceX = shape.center.x - currentView.center.x
+                let initialDistanceY = shape.center.y - currentView.center.y
                 let distanceBetweenCentres =  (initialDistanceX*initialDistanceX + initialDistanceY*initialDistanceY).squareRoot()
                 
-                let distanceBetweenShapes = shape.frame.size.width/2 + lastAdded!.frame.size.width/2
+                let distanceBetweenShapes = shape.frame.size.width/2 + currentView.frame.size.width/2
                 
                 if distanceBetweenCentres < distanceBetweenShapes {
                     
                     let proportionalDistance = distanceBetweenShapes / distanceBetweenCentres
                     
-                    let lastAddedPosition = lastAdded!.center
+                    let lastAddedPosition = currentView.center
                     
                     let size = shape.frame.size
                     
@@ -193,7 +238,7 @@ class ViewController: UIViewController {
                            shape.frame = CGRect(origin: newPosition, size: size)
                         },
                         completion: {(finished : Bool) in
-                            if finished {self.theGreatShapeDance()}
+                            if finished {self.theGreatShapeDance(currentView)}
                         }
                     )
                     
@@ -206,7 +251,7 @@ class ViewController: UIViewController {
     
     func removeShapesOutOfBounds() {
         var shapesDeleted = 0
-         view.subviews.forEach { shape in
+        view.subviews.forEach { shape in
             if  (
                     shape.center.x + shape.frame.size.width/2 < 0 ||
                     shape.center.y + shape.frame.size.height/2 < 0
@@ -222,13 +267,22 @@ class ViewController: UIViewController {
         shapesDeleted > 0 ? print("Deleted \(shapesDeleted) shapes.") : nil
     }
     
-    func theGreatShapeDance() {
+    func theGreatShapeDance(_ currentView : UIView) {
+        
         var shapesMoved = 0
         var shapeMoved = false
-        view.subviews.reversed().forEach{ mainShape in
+        view.subviews.sorted(by: {
+            let distanceX1 = $0.center.x - currentView.center.x
+            let distanceY1 = $0.center.y - currentView.center.y
+            let distanceX2 = $1.center.x - currentView.center.x
+            let distanceY2 = $1.center.y - currentView.center.y
+            let distance1 = distanceX1 * distanceX1 + distanceY1 * distanceY1
+            let distance2 = distanceX2 * distanceX2 + distanceY2 * distanceY2
+            return distance1 < distance2
+        }).forEach{ mainShape in
             let currentShape = mainShape
             view.subviews.forEach { shape in
-                if shape != currentShape && shape != resetButton {
+                if shape != currentShape && shape != resetButton && shape != explanationLabel{
                     let initialDistanceX = shape.center.x - currentShape.center.x
                     let initialDistanceY = shape.center.y - currentShape.center.y
                     let distanceBetweenCentres =  (initialDistanceX * initialDistanceX + initialDistanceY * initialDistanceY).squareRoot()
@@ -276,7 +330,7 @@ class ViewController: UIViewController {
         print("This dance moved \(shapesMoved) shapes.")
         removeShapesOutOfBounds()
         if shapeMoved && greatCircleDance < 150 {
-            theGreatShapeDance()
+            theGreatShapeDance(currentView)
         } else {
             print("The Great Circle Dance has run \(greatCircleDance) times. There are \(view.subviews.count) shapes.")
             greatCircleDance = 0
@@ -297,7 +351,6 @@ class ViewController: UIViewController {
         let newView = UIView()
         
         newView.frame = CGRect(origin: position, size: size)
-//        newView.backgroundColor = makeRandomColor()
         let gradient = CAGradientLayer()
 
         gradient.frame = newView.bounds
@@ -311,10 +364,13 @@ class ViewController: UIViewController {
             x: CGFloat.random(in: 0.0 ... 1.0),
             y: 1
         )
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+        
+        newView.isUserInteractionEnabled = true
+        newView.addGestureRecognizer(panGesture)
         newView.layer.insertSublayer(gradient, at: 0)
         newView.layer.cornerRadius = makeRandomCornerRadius(usingWidth: shorterSizeOfTheThing)
-        
-        
         
         return newView
         
@@ -331,8 +387,8 @@ class ViewController: UIViewController {
         let exactX = (lastTouch?.x ?? view.center.x) - (width/2)
         let exactY = (lastTouch?.y ?? view.center.y) - (height/2)
         
-        let rangeOfXPosition: ClosedRange<CGFloat> = exactX-50 ... exactX+50
-        let rangeOfYPosition: ClosedRange<CGFloat> = exactY-50 ... exactY+50
+        let rangeOfXPosition: ClosedRange<CGFloat> = exactX-25 ... exactX+25
+        let rangeOfYPosition: ClosedRange<CGFloat> = exactY-25 ... exactY+25
         
         
 //      This is how it was done in example - total randomness, all within range.
@@ -352,19 +408,37 @@ class ViewController: UIViewController {
     
     func makeRandomColor() -> UIColor {
         
-//        let randomRange : ClosedRange<CGFloat> = 0...255
+        let fullRange : ClosedRange<CGFloat> = 0...255
         let pastelRange : ClosedRange<CGFloat> = 127...255
         
-        let randomRed = CGFloat.random(in: pastelRange) / 255
-        let randomGreen = CGFloat.random(in: pastelRange) / 255
-        let randomBlue = CGFloat.random(in: pastelRange) / 255
-//        let randomRed = CGFloat.random(in: randomRange) / 255
-//        let randomGreen = CGFloat.random(in: randomRange) / 255
-//        let randomBlue = CGFloat.random(in: randomRange) / 255
-        let randomAlpha = CGFloat.random(in: 0.6...1)
+        let randomPastelRed     = CGFloat.random(in: pastelRange) / 255
+        let randomPastelGreen   = CGFloat.random(in: pastelRange) / 255
+        let randomPastelBlue    = CGFloat.random(in: pastelRange) / 255
         
+        let randomRed           = CGFloat.random(in: fullRange) / 255
+        let randomGreen         = CGFloat.random(in: fullRange) / 255
+        let randomBlue          = CGFloat.random(in: fullRange) / 255
         
-        return UIColor(red: randomRed, green: randomGreen, blue: randomBlue, alpha: randomAlpha)
+        let randomAlpha         = CGFloat.random(in: 0.6...1)
+        
+        return UIColor.init(dynamicProvider: { traitCollection in
+            if traitCollection.userInterfaceStyle == .dark {
+                return UIColor(
+                    red: randomRed,
+                    green: randomGreen,
+                    blue: randomBlue,
+                    alpha: randomAlpha
+                )
+            } else {
+                return UIColor(
+                    red: randomPastelRed,
+                    green: randomPastelGreen,
+                    blue: randomPastelBlue,
+                    alpha: randomAlpha
+                )
+            }
+        })
+
     }
 
     func makeRandomCornerRadius(usingWidth width: CGFloat) -> CGFloat {

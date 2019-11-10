@@ -19,17 +19,15 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="3Er-Rj-JEf" appends="YES" id="dNM-5s-5yV"/>
-                            <outletCollection property="gestureRecognizers" destination="2tg-Rm-anj" appends="YES" id="fC1-eY-nep"/>
                         </connections>
                     </view>
                     <connections>
-                        <outlet property="gr" destination="3Er-Rj-JEf" id="3Ll-kG-cBT"/>
-                        <outlet property="sgr" destination="2tg-Rm-anj" id="AEH-B2-Yd2"/>
+                        <outlet property="tapGesture" destination="3Er-Rj-JEf" id="3Ll-kG-cBT"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <tapGestureRecognizer id="3Er-Rj-JEf"/>
-                <swipeGestureRecognizer direction="right" id="2tg-Rm-anj"/>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="JMm-2z-mP3"/>
             </objects>
             <point key="canvasLocation" x="139" y="138"/>
         </scene>
